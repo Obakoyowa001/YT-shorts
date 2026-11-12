@@ -12,6 +12,7 @@ This repository contains a complete reverse-engineering and video analysis of th
   1. **From Illegal Casino To Real Business** (`uiIKhYWuO50` — 68s, 1.10M views, 31.8K likes)
   2. **How Cheap Phone Shops Earn Money** (`NrVzNpmNZ3s` — 53s, 661K views, 11.6K likes)
   3. **How Money Gets Cleaned** (`IdSsAquESBE` — 61s, 1.71M views, 53.6K likes)
+- [`analysis/03_performance_insights_and_strategy.md`](./analysis/03_performance_insights_and_strategy.md) — Verified metrics, which topics perform best, originality guardrails, topic backlog, and the production/automation pipeline.
 - [`transcripts/`](./transcripts/) — Clean full-text scripts, word-level timing stats, and raw `.vtt` caption files.
 
 ---
@@ -26,8 +27,8 @@ Every video opens in **second person ("You")** throwing the viewer straight into
 - *Pattern B (Sudden Windfall Problem):* `"You just made $100,000 in cash in a gym bag from a job we're not going to talk about. Congratulations. You can't spend a cent of it."`
 - Immediately follow with the **Core Conflict / Paradox** (why the obvious move fails or how the hidden margin actually works).
 
-### Rule 2: Relentless Pacing & Reading Level (50–68 Seconds, ~3.0–3.3 Words/Sec)
-- **Target Word Count:** 165 to 210 words (for a 53–68 second Short).
+### Rule 2: Relentless Pacing & Reading Level (50–68 Seconds, ~3.5–3.8 Words/Sec)
+- **Target Word Count:** 190 to 240 words (for a 53–68 second Short; ~210–230 WPM).
 - **Reading Grade:** 4th–5th grade vocabulary. Zero jargon without an immediate physical joke explaining it.
 - **Sentence Length:** Short, punchy declarative sentences (6–12 words average).
 - **Named Business Concepts:** Always teach 1 to 3 real economic/financial terms (`placement`, `layering`, `integration`, `gray import`, `loss leader`), introduced *after* showing the physical action:
@@ -41,7 +42,7 @@ Use a consistent cast of recurring toy-like characters so viewers build parasoci
 4. **The Inspector / Government / Banker:** Bowler hat & monocle/glasses (Tax Man) or stern police/inspector who "does the math."
 
 ### Rule 4: Visual Gags & Diegetic Props (Show, Don't Just Tell)
-Every 1.5 to 2.2 seconds, the camera cuts to a new physical gag or close-up prop with **huge, readable in-world text**:
+Hard-cut to a new shot roughly every 2.5 seconds (22–25 shots per Short), and keep the camera moving / new props or text popping in every ~1.5–2 seconds within each shot, so every beat lands on a new physical gag or close-up prop with **huge, readable in-world text**:
 - Never show complex spreadsheets. Show a whiteboard where a hand physically sticks a green `0` onto `$5,000` to make `$50,000`.
 - Show a literal yellow sponge wiping a phone screen to "wipe" a trade-in phone.
 - Show a bubble machine with its power cord lying unplugged next to a wall outlet (`"The bubble machine isn't even plugged in."`).

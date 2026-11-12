@@ -2,8 +2,8 @@
 
 ## 1. From Illegal Casino To Real Business (`uiIKhYWuO50`)
 - **Duration:** 68 seconds
-- **Word Count:** 206 words
-- **Speaking Rate:** 3.03 words/second (182 WPM)
+- **Word Count:** 237 words
+- **Speaking Rate:** 3.49 words/second (209 WPM)
 
 > If you run a secret casino in Timmy's basement, congratulations. You're in the gambling business, the illegal kind. By Friday, you have a shoebox with $50,000 in it, but you can't spend it. The second you buy a Lamborghini, not only are your friends going to ask how you got a Lambo for 50 grand, but the inspector's going to want to know how a guy with no job got 50 grand.
 >
@@ -19,8 +19,8 @@
 
 ## 2. How Cheap Phone Shops Earn Money (`NrVzNpmNZ3s`)
 - **Duration:** 53 seconds
-- **Word Count:** 173 words
-- **Speaking Rate:** 3.26 words/second (196 WPM)
+- **Word Count:** 193 words
+- **Speaking Rate:** 3.64 words/second (218 WPM)
 
 > If you open a tiny phone shop right next to the big phone store and sell the same phone $200 cheaper, congratulations, you're in the phone business. But how are you cheaper than the company that makes it?
 >
@@ -38,8 +38,8 @@
 
 ## 3. How Money Gets Cleaned (`IdSsAquESBE`)
 - **Duration:** 61 seconds
-- **Word Count:** 186 words
-- **Speaking Rate:** 3.05 words/second (183 WPM)
+- **Word Count:** 231 words
+- **Speaking Rate:** 3.79 words/second (227 WPM)
 
 > You just made a hundred thousand dollars in cash in a gym bag from a job we're not going to talk about. Congratulations. You can't spend a cent of it. Walk into a car dealer with a bag of twenties and they ask one question. Where'd you get this? And I found it is not a business plan.
 >
