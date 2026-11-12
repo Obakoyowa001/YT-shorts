@@ -377,7 +377,7 @@ def s21(c, t, d):
     if s:
         c.ellipse(540, 1120, 470 * s, 100 * s, None, outline=RED, w=12, shadow=False)
     if t > 0.9:
-        c.text(800, 440, "HA HA!", 90 * pop(t, 0.9), WHITE, kind="cap", stroke=8)
+        c.text(230, 1420, "HA HA!", 84 * pop(t, 0.9), WHITE, kind="cap", stroke=8)
     gx, gy = 540, 1560
     c.circle(gx, gy + 60, 120, (241, 198, 160))
     shrink = prog(t, 1.6, 2.4)
