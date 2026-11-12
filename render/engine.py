@@ -11,6 +11,8 @@ import numpy as np
 from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 
 BASE_W, BASE_H = 1080, 1920
+SCENE_LIFT = -200   # lift every scene so captions sit on empty ground below the action
+CAPTION_Y = 1480    # ~77% down: clear of scene signs and of the Shorts UI
 HERE = os.path.dirname(os.path.abspath(__file__))
 FONT_DIR = os.path.join(HERE, "fonts")
 FONT_FILES = {"sign": "Rye-Regular.ttf", "cap": "LuckiestGuy-Regular.ttf"}
@@ -109,7 +111,7 @@ class Canvas:
 
     def P(self, x, y):
         return (((x - self.fx) * self.z + 540) * self.S,
-                ((y - self.fy) * self.z + 960) * self.S)
+                ((y - self.fy) * self.z + 960 + SCENE_LIFT) * self.S)
 
     def L(self, v):
         return v * self.z * self.S
@@ -278,7 +280,7 @@ def sign(c, x, y, w, h, txt, size=60, bg=CREAM, fg=INK, post=0, border=WOOD_D,
     c.text(x, y, txt, size, fg, kind=kind)
 
 
-def badge(c, t, txt, t0=0.0, x=540, y=330):
+def badge(c, t, txt, t0=0.0, x=540, y=560):
     s = pop(t, t0)
     if s > 0:
         c.rect(x - 190 * s, y - 62 * s, x + 190 * s, y + 62 * s, RED, r=30 * s,
@@ -663,7 +665,7 @@ def draw_caption(img, S, word, age, gold):
     sc = 0.6 + 0.4 * pop(age, 0.0, 0.18)
     size = 104 * S * sc
     f = font("cap", size)
-    x, y = 540 * S, 1100 * S
+    x, y = 540 * S, CAPTION_Y * S
     d.text((x + 6 * S, y + 9 * S), word, font=f, fill=(0, 0, 0, 120), anchor="mm",
            stroke_width=int(11 * S), stroke_fill=(0, 0, 0, 120))
     d.text((x, y), word, font=f, fill=(255, 215, 0) if gold else (255, 255, 255),
