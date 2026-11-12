@@ -2,3 +2,5 @@
 yt-dlp_macos
 .DS_Store
 __pycache__/
+render/fonts/
+out/
