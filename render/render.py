@@ -53,6 +53,45 @@ def decode(path):
     return np.frombuffer(raw, np.int16).astype(np.float32) / 32768
 
 
+def _trim(a, thr=0.012):
+    idx = np.where(np.abs(a) > thr)[0]
+    if len(idx) == 0:
+        return a
+    return a[max(0, idx[0] - int(0.02 * SR)): idx[-1] + int(0.05 * SR)]
+
+
+def tts_piper(segments, work, model, length_scale):
+    """Offline neural TTS. Synthesises per segment; word times are spread across
+    each segment by word length (good enough for one-word captions)."""
+    from piper import PiperVoice
+
+    pv = PiperVoice.load(model)
+    gap = np.zeros(int(0.07 * SR), np.float32)
+    parts, words, t = [], [], 0.0
+    for i, seg in enumerate(segments):
+        p = os.path.join(work, f"seg{i:02d}.wav")
+        with wave.open(p, "wb") as wf:
+            try:
+                from piper import SynthesisConfig
+                pv.synthesize_wav(seg["text"], wf,
+                                  syn_config=SynthesisConfig(length_scale=length_scale))
+            except ImportError:
+                pv.synthesize(seg["text"], wf, length_scale=length_scale)
+        a = _trim(decode(p))
+        dur = len(a) / SR
+        toks = [w for w in seg["text"].split() if norm(w)]
+        wts = [len(norm(w)) + 2 + (3 if w[-1] in ",.?!" else 0) for w in toks]
+        tot = float(sum(wts))
+        acc = 0.0
+        for w, k in zip(toks, wts):
+            st = t + dur * acc / tot
+            acc += k
+            words.append((st, t + dur * acc / tot, w))
+        parts += [a, gap]
+        t += dur + len(gap) / SR
+    return np.concatenate(parts).astype(np.float32), words
+
+
 # ---------------------------------------------------------------- music + sfx
 def pluck(freq, dur, amp=1.0):
     t = np.arange(int(dur * SR)) / SR
@@ -179,10 +218,25 @@ def main():
     short = importlib.import_module(f"shorts.{args.short}")
     text = " ".join(s["text"] for s in short.SEGMENTS)
 
-    # 1. voice + word timings
-    mp3 = os.path.join(args.work, "voice.mp3")
-    words = tts(text, mp3, short.VOICE, short.RATE)
-    voice = decode(mp3)
+    # 1. voice + word timings (Microsoft Edge voice, falling back to local Piper)
+    engine_pref = os.environ.get("TTS_ENGINE", "auto")
+    voice = None
+    if engine_pref in ("auto", "edge"):
+        try:
+            mp3 = os.path.join(args.work, "voice.mp3")
+            words = tts(text, mp3, short.VOICE, short.RATE)
+            voice = decode(mp3)
+            print("tts: edge")
+        except Exception as e:  # noqa: BLE001
+            if engine_pref == "edge":
+                raise
+            print(f"[warn] edge-tts failed ({type(e).__name__}: {e}); using Piper")
+    if voice is None:
+        voice, words = tts_piper(short.SEGMENTS, args.work,
+                                 os.environ.get("PIPER_MODEL",
+                                                os.path.join(E.HERE, "voices", "en_US-ryan-high.onnx")),
+                                 float(getattr(short, "PIPER_LENGTH_SCALE", 0.8)))
+        print("tts: piper")
     vdur = len(voice) / SR
     print(f"voice: {vdur:.1f}s, {len(words)} words, {len(words) / vdur * 60:.0f} WPM")
     json.dump(words, open(os.path.join(args.work, "words.json"), "w"), indent=0)
