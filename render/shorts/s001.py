@@ -7,7 +7,7 @@ from engine import (CREAM, GOLD, GREY, INK, MONEY, MUD, RED, STEEL, WHITE, WOOD,
                     prog, shack, sign, sparkle, strongbox, sun, tree, wall_planks, wildcat)
 
 VOICE = "en-US-GuyNeural"
-RATE = "+28%"
+RATE = "+40%"
 GOLD_WORDS = {"michigan", "legally", "dog", "gold", "silver", "nobody", "wildcats",
               "wildcat", "inspector", "rich", "nails", "glass", "coins", "beautiful",
               "gus", "boots", "laughs", "cents", "town", "run", "money", "bank"}

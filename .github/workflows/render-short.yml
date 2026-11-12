@@ -48,8 +48,23 @@ jobs:
           ffprobe -v error -show_entries stream=codec_name,width,height,r_frame_rate:format=duration,size \
             -of default=nw=1 out/*_4k.mp4
 
+      - name: Make preview + frame sheet
+        run: |
+          f=$(ls out/*_4k.mp4)
+          ffmpeg -v error -y -i "$f" -vf "fps=1/2.5,scale=270:-1,tile=7x4" -frames:v 1 out/frames.jpg
+          ffmpeg -v error -y -i "$f" -vf scale=540:960 -c:v libx264 -crf 28 -preset veryfast \
+            -c:a aac -b:a 96k out/preview_540p.mp4
+
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.short || 's001' }}-4k
           path: out/*_4k.mp4
+          retention-days: 30
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.short || 's001' }}-preview
+          path: |
+            out/frames.jpg
+            out/preview_540p.mp4
           retention-days: 30
