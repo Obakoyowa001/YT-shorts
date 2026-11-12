@@ -9,9 +9,9 @@
 
 | Video ID | Title | Upload Date | Duration | Views | Likes | Comments | Like-to-View Ratio | Word Count | Pacing (Words/Sec) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| [`uiIKhYWuO50`](https://youtube.com/shorts/uiIKhYWuO50) | **From Illegal Casino To Real Business** | 2026-10-23 | 68s | 1,096,452 | 31,849 | 109 | 2.90% | 206 words | 3.03 WPS (182 WPM) |
-| [`NrVzNpmNZ3s`](https://youtube.com/shorts/NrVzNpmNZ3s) | **How Cheap Phone Shops Earn Money** | 2026-11-02 | 53s | 661,385 | 11,566 | 53 | 1.75% | 173 words | 3.26 WPS (196 WPM) |
-| [`IdSsAquESBE`](https://youtube.com/shorts/IdSsAquESBE) | **How Money Gets Cleaned** | 2026-11-03 | 61s | 1,706,317 | 53,584 | 409 | 3.14% | 186 words | 3.05 WPS (183 WPM) |
+| [`uiIKhYWuO50`](https://youtube.com/shorts/uiIKhYWuO50) | **From Illegal Casino To Real Business** | 2026-10-23 | 68s | 1,096,452 | 31,849 | 109 | 2.90% | 237 words | 3.49 WPS (209 WPM) |
+| [`NrVzNpmNZ3s`](https://youtube.com/shorts/NrVzNpmNZ3s) | **How Cheap Phone Shops Earn Money** | 2026-11-02 | 53s | 661,385 | 11,566 | 53 | 1.75% | 193 words | 3.64 WPS (218 WPM) |
+| [`IdSsAquESBE`](https://youtube.com/shorts/IdSsAquESBE) | **How Money Gets Cleaned** | 2026-11-03 | 61s | 1,706,317 | 53,584 | 409 | 3.14% | 231 words | 3.79 WPS (227 WPM) |
 
 ---
 
@@ -64,7 +64,7 @@ Every Short follows an identical, tightly engineered **5-Act Narrative Structure
 - **Proportions:** Chibi/Mii-style stylized 3D figures (~3 heads tall), spherical heads, cylindrical torsos, stubby limbs, and **rounded mitten/pill hands with no individual fingers**.
 - **Shaders & Materials:** Soft matte plastic/clay shaders for skin and props; subtle fabric weave normal map on suits and Timmy's striped shirt; warm global illumination with soft contact shadows.
 - **Facial Animation:** 2D flat vector-style eyes, eyebrows, rosy circular cheek blushes, and mouth shapes projected onto the smooth 3D head sphere (similar to *Animal Crossing* or Lego/Mii facial rigs). Eyes swap quickly between neutral dots, happy upward crescents (`^ ^`), skeptical half-lids, and shocked `O` mouths.
-- **Recurring Cast:**
+- **Recurring Cast (reference channel — describes *their* characters; for our videos use our own cast per `CLAUDE.md` Rule 3):**
   1. **The Protagonist ("You"):** Grey business suit, white shirt, red or dark tie, grey/taupe sculpted hair.
   2. **Timmy:** Bright orange curly hair, thick round black eyeglasses, freckles, yellow-and-navy horizontal striped polo shirt with white collar, blue pants.
   3. **Tony:** Burgundy tracksuit or dealer outfit, slicked dark hair, yellow-tinted aviator glasses, thin mustache, gold chain/nameplate (`TONY`).
@@ -82,7 +82,7 @@ Every Short follows an identical, tightly engineered **5-Act Narrative Structure
   - Funny literal props: A blue mailbox labeled `TAXES`; a place card on a stack of cash reading `DENTIST - Tue 3:00`; a document stamped `MORTGAGE - APPROVED`; a yacht named `CAR WASH`.
 
 ### C. Camera Work & Editing Rhythm
-- **Shot Duration:** 1.4 to 2.2 seconds per cut (roughly 28–35 distinct camera shots per 60-second Short).
+- **Shot Duration:** ~2.4–2.7 seconds per hard cut on average (22–25 distinct shots per Short, measured with ffmpeg scene detection). Because almost every shot also has a continuous camera move and new props/text popping in, something changes on screen roughly every 1.5–2 seconds even within a single shot.
 - **Camera Motion:** Almost every shot has a continuous, smooth linear camera move—either a **slow dolly push-in**, a **horizontal truck/pan** across a table of props (e.g., panning from `$999` sign to `$799` sign, or panning from `COST 50¢` card to `$30` price tag), or an **over-the-shoulder reveal**.
 - **Visual Literalism / Sight Gags:**
   - When saying *"you can't spend a cent of it"*, a giant yellow padlock drops onto the gym bag with a metallic clank.
@@ -103,7 +103,7 @@ Every Short follows an identical, tightly engineered **5-Act Narrative Structure
 ## 5. Audio, Voiceover & Sound Design Blueprint
 
 - **Voiceover Profile:** Crisp, warm, energetic American male narrator. Delivery is conversational, slightly conspiratorial, and deadpan-humorous—like a savvy older brother explaining how a hustle works.
-- **Speech Cadence:** ~180–195 words per minute (3.0–3.25 words/sec). Zero long pauses (>0.4s); sentences are trimmed tightly in the DAW so each thought flows immediately into the next.
+- **Speech Cadence:** ~210–230 words per minute (3.5–3.8 words/sec) — noticeably faster than normal speech (~150 WPM). Zero long pauses (>0.4s); sentences are trimmed tightly in the DAW so each thought flows immediately into the next.
 - **Background Music:** Low-volume (-22dB to -26dB under voice), quirky pizzicato strings / sneaking marimba / light acoustic guitar groove (sneaky "heist/capers" vibe for crime/laundering topics; upbeat quirky toy-shop groove for retail topics).
 - **Layered Sound Effects (SFX every 1.5–2 seconds):**
   - **Cash/Money:** Crisp paper bill rustle, classic `cha-ching` register bell, coin clink, sparkle chime (`twinkle` SFX accompanied by 2D star particles on screen).
