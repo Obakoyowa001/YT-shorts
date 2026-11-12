@@ -1,0 +1,4 @@
+.venv/
+yt-dlp_macos
+.DS_Store
+__pycache__/
