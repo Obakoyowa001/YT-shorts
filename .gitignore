@@ -4,3 +4,4 @@ yt-dlp_macos
 __pycache__/
 render/fonts/
 out/
+render/voices/
