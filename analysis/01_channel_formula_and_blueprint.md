@@ -64,7 +64,7 @@ Every Short follows an identical, tightly engineered **5-Act Narrative Structure
 - **Proportions:** Chibi/Mii-style stylized 3D figures (~3 heads tall), spherical heads, cylindrical torsos, stubby limbs, and **rounded mitten/pill hands with no individual fingers**.
 - **Shaders & Materials:** Soft matte plastic/clay shaders for skin and props; subtle fabric weave normal map on suits and Timmy's striped shirt; warm global illumination with soft contact shadows.
 - **Facial Animation:** 2D flat vector-style eyes, eyebrows, rosy circular cheek blushes, and mouth shapes projected onto the smooth 3D head sphere (similar to *Animal Crossing* or Lego/Mii facial rigs). Eyes swap quickly between neutral dots, happy upward crescents (`^ ^`), skeptical half-lids, and shocked `O` mouths.
-- **Recurring Cast:**
+- **Recurring Cast (reference channel — describes *their* characters; for our videos use our own cast per `CLAUDE.md` Rule 3):**
   1. **The Protagonist ("You"):** Grey business suit, white shirt, red or dark tie, grey/taupe sculpted hair.
   2. **Timmy:** Bright orange curly hair, thick round black eyeglasses, freckles, yellow-and-navy horizontal striped polo shirt with white collar, blue pants.
   3. **Tony:** Burgundy tracksuit or dealer outfit, slicked dark hair, yellow-tinted aviator glasses, thin mustache, gold chain/nameplate (`TONY`).
