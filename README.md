@@ -7,11 +7,11 @@ This repository contains the downloaded source assets, transcripts, metadata, an
 ## Analyzed Reference Shorts
 
 1. **[From Illegal Casino To Real Business](https://youtube.com/shorts/uiIKhYWuO50)** (`uiIKhYWuO50`)
-   - **Stats:** 1,096,452 views | 31,849 likes | 68 seconds | 206 words (3.03 words/sec)
+   - **Stats:** 1,096,452 views | 31,849 likes | 68 seconds | 237 words (3.49 words/sec)
 2. **[How Cheap Phone Shops Earn Money](https://youtube.com/shorts/NrVzNpmNZ3s)** (`NrVzNpmNZ3s`)
-   - **Stats:** 661,385 views | 11,566 likes | 53 seconds | 173 words (3.26 words/sec)
+   - **Stats:** 661,385 views | 11,566 likes | 53 seconds | 193 words (3.64 words/sec)
 3. **[How Money Gets Cleaned](https://youtube.com/shorts/IdSsAquESBE)** (`IdSsAquESBE`)
-   - **Stats:** 1,706,317 views | 53,584 likes | 61 seconds | 186 words (3.05 words/sec)
+   - **Stats:** 1,706,317 views | 53,584 likes | 61 seconds | 231 words (3.79 words/sec)
 
 ---
 
@@ -22,6 +22,7 @@ This repository contains the downloaded source assets, transcripts, metadata, an
 | [`CLAUDE.md`](./CLAUDE.md) | **Start Here for Claude:** System instructions, 7 Golden Rules, recurring character bible, caption rules, and output templates for generating new scripts and storyboards. |
 | [`analysis/01_channel_formula_and_blueprint.md`](./analysis/01_channel_formula_and_blueprint.md) | Deep-dive analysis of the 5-Act narrative formula, hook mechanics, 3D "toy/clay" visual style, camera pacing, diegetic prop labels, and sound design. |
 | [`analysis/02_video_breakdowns.md`](./analysis/02_video_breakdowns.md) | Second-by-second, shot-by-shot visual, audio, and script breakdowns of all 3 Shorts. |
+| [`analysis/03_performance_insights_and_strategy.md`](./analysis/03_performance_insights_and_strategy.md) | Independent metric verification, topic-performance insights (shady topics ~2x views), originality guardrails, topic backlog, and automation pipeline. |
 | [`transcripts/transcripts_clean.md`](./transcripts/transcripts_clean.md) | Clean, full-text transcripts with exact word counts and speaking-rate (WPS/WPM) metrics. |
 | [`videos/`](./videos/) | Downloaded `.mp4` video files, `.en.vtt` word-level timestamped subtitle files, and `.info.json` metadata. |
 

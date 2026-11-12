@@ -12,6 +12,7 @@ This repository contains a complete reverse-engineering and video analysis of th
   1. **From Illegal Casino To Real Business** (`uiIKhYWuO50` — 68s, 1.10M views, 31.8K likes)
   2. **How Cheap Phone Shops Earn Money** (`NrVzNpmNZ3s` — 53s, 661K views, 11.6K likes)
   3. **How Money Gets Cleaned** (`IdSsAquESBE` — 61s, 1.71M views, 53.6K likes)
+- [`analysis/03_performance_insights_and_strategy.md`](./analysis/03_performance_insights_and_strategy.md) — Verified metrics, which topics perform best, originality guardrails, topic backlog, and the production/automation pipeline.
 - [`transcripts/`](./transcripts/) — Clean full-text scripts, word-level timing stats, and raw `.vtt` caption files.
 
 ---
@@ -20,35 +21,43 @@ This repository contains a complete reverse-engineering and video analysis of th
 
 Whenever asked to brainstorm topics, write a script, or build a storyboard/prompt list for a new Short, strictly adhere to these **7 Golden Rules** derived from the data:
 
+> **Originality first (see [`analysis/03_performance_insights_and_strategy.md`](./analysis/03_performance_insights_and_strategy.md), Section 3):** reuse the *formula*, never the channel's *assets*. Every script, gag, character design, and name must be our own. Quoted lines below come from the reference channel and are there to show the pattern. Never reuse them verbatim or lightly reworded.
+
 ### Rule 1: The "You + Absurd Premise + Congratulations" Hook (0.0s – 8.0s)
 Every video opens in **second person ("You")** throwing the viewer straight into a shady, grey-area, or counter-intuitive business operation, punctuated by a deadpan **"Congratulations."**
 - *Pattern A (Illicit/Grey Hustle):* `"If you [do shady/clever business move], congratulations—you're in the [X] business."`
 - *Pattern B (Sudden Windfall Problem):* `"You just made $100,000 in cash in a gym bag from a job we're not going to talk about. Congratulations. You can't spend a cent of it."`
 - Immediately follow with the **Core Conflict / Paradox** (why the obvious move fails or how the hidden margin actually works).
+- **Topic choice:** prefer "secret/shady money" topics. They pulled ~2x the views of legal-retail topics. Frame them as explanation, never as instructions. When a video over-performs, re-run the same topic 1–3 weeks later with a new setting/metaphor (doc 03, Sections 2.2–2.3 and topic backlog in Section 4).
 
-### Rule 2: Relentless Pacing & Reading Level (50–68 Seconds, ~3.0–3.3 Words/Sec)
-- **Target Word Count:** 165 to 210 words (for a 53–68 second Short).
+### Rule 2: Relentless Pacing & Reading Level (50–68 Seconds, ~3.5–3.8 Words/Sec)
+- **Target Word Count:** 190 to 240 words (for a 53–68 second Short; ~210–230 WPM).
 - **Reading Grade:** 4th–5th grade vocabulary. Zero jargon without an immediate physical joke explaining it.
 - **Sentence Length:** Short, punchy declarative sentences (6–12 words average).
 - **Named Business Concepts:** Always teach 1 to 3 real economic/financial terms (`placement`, `layering`, `integration`, `gray import`, `loss leader`), introduced *after* showing the physical action:
   > *"Every night, you slip casino cash into the register, making it look like it came from washing socks. Timmy washes the actual socks for free. **This is called placement.**"*
 
-### Rule 3: The Recurring Character Cast
-Use a consistent cast of recurring toy-like characters so viewers build parasocial familiarity across episodes:
-1. **The Boss ("You"):** Grey suit, neat grey/brown hair, calm, calculating entrepreneur/hustler who executes the scheme.
-2. **Timmy (The Naive Customer / Fall Guy):** Orange curly hair, round black glasses, yellow-and-navy horizontal striped polo shirt. He happily overpays for plastic phone cases, gets made "Director" of an offshore shell company thinking it's a promotion, or leaves a 5-star review ("very relaxing") after his car comes out dirtier than it went in.
-3. **Tony (The Shady Middleman / Dealer):** Tracksuit or bakery/dealership owner, tinted glasses, pencil mustache—asks pointed questions or helps bounce cash.
-4. **The Inspector / Government / Banker:** Bowler hat & monocle/glasses (Tax Man) or stern police/inspector who "does the math."
+### Rule 3: The Recurring Character Cast (Our Own Characters, Same Four Roles)
+Use a consistent cast of recurring characters so viewers build parasocial familiarity across episodes. Keep the four **roles** that make the reference channel work, but use **our own names and visual designs**. Do **not** reproduce the reference channel's characters (Timmy, Tony, the bowler-hat Tax Man) or their looks.
+
+| Role | What the role does | Our character |
+| :--- | :--- | :--- |
+| **1. The Boss ("You")** | Calm, calculating operator who runs the scheme; stands in for the viewer. | *TBD: our own name & design* |
+| **2. The Fall Guy** | Lovable, naive customer/accomplice who gets used and never notices. Delivers the comedic payoff in Act IV and appears in every episode. | *TBD: our own name & design* |
+| **3. The Middleman** | Shady dealer/partner who asks pointed questions or helps move the money. | *TBD: our own name & design* |
+| **4. The Authority** | Inspector/tax man/banker who "does the math" and catches the scheme. | *TBD: our own name & design* |
+
+Design guidance: pick a visual style and silhouettes clearly different from the reference channel's (different art style, palette, proportions, signature outfits). Once the cast is defined, replace the *TBD* cells and use those names in every script.
 
 ### Rule 4: Visual Gags & Diegetic Props (Show, Don't Just Tell)
-Every 1.5 to 2.2 seconds, the camera cuts to a new physical gag or close-up prop with **huge, readable in-world text**:
+Hard-cut to a new shot roughly every 2.5 seconds (22–25 shots per Short), and keep the camera moving / new props or text popping in every ~1.5–2 seconds within each shot, so every beat lands on a new physical gag or close-up prop with **huge, readable in-world text**:
 - Never show complex spreadsheets. Show a whiteboard where a hand physically sticks a green `0` onto `$5,000` to make `$50,000`.
 - Show a literal yellow sponge wiping a phone screen to "wipe" a trade-in phone.
 - Show a bubble machine with its power cord lying unplugged next to a wall outlet (`"The bubble machine isn't even plugged in."`).
 - Show stacks of cash sitting next to a literal appointment card that says `DENTIST - Tue 3:00` (`"Now the money is clean. It has receipts. It has a dentist."`).
 
 ### Rule 5: The Twist / Ironic Payoff Ending (48s – 65s)
-End with a humorous escalation featuring Timmy and a signature closing one-liner:
+End with a humorous escalation featuring **our Fall Guy** (Rule 3), then the signature closing line *"And that's basically how every ___ works."* It generalizes the lesson and loops cleanly back to the hook. Reference-channel examples of the pattern (do not reuse):
 - *"The cheap phone was never the product. Timmy was. And that's basically how every phone shop works."*
 - *"That's the only real money this place made all year. And that's basically how every money laundering scheme works."*
 - *"The inspector does the math. So do the 12 police cars outside Timmy's house."*
