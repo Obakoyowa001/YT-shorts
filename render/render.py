@@ -1,156 +1,39 @@
-"""Render a Short to MP4: TTS voice + word captions + music + paper-craft scenes.
+"""Render a Short in three stages so the heavy video part can run on parallel cloud jobs.
 
-Usage:
-  python render/render.py --short s001 --width 2160 --height 3840 --out out/short.mp4
-  python render/render.py --short s001 --width 270 --height 480 --fps 12 --out preview.mp4
+  prep      voice (TTS) + word timings + full sound mix + shot plan     -> work/plan.json, mix.wav
+  shots     render this shard's shots to MP4 segments (4K60 by default) -> work/shotNN.mp4
+  assemble  join segments, add the mix, loudness-normalise             -> final MP4
+  all       run everything locally
+
+  python render/render.py all --short s001 --width 540 --height 960 --fps 30 --out out/p.mp4
 """
 import argparse
-import asyncio
 import importlib
 import json
-import math
 import multiprocessing as mp
 import os
 import re
 import subprocess
 import sys
-import wave
 
 import numpy as np
-from PIL import Image
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import engine as E  # noqa: E402
+import audio as A  # noqa: E402
 
-SR = 44100
-
-
-# ---------------------------------------------------------------- voice
-def tts(text, mp3_path, voice, rate):
-    import edge_tts
-
-    async def run():
-        try:
-            comm = edge_tts.Communicate(text, voice, rate=rate, boundary="WordBoundary")
-        except TypeError:  # older edge-tts: word boundaries are the default
-            comm = edge_tts.Communicate(text, voice, rate=rate)
-        words = []
-        with open(mp3_path, "wb") as f:
-            async for ch in comm.stream():
-                if ch["type"] == "audio":
-                    f.write(ch["data"])
-                elif ch["type"] == "WordBoundary":
-                    st = ch["offset"] / 1e7
-                    words.append((st, st + ch["duration"] / 1e7, ch["text"]))
-        return words
-
-    return asyncio.run(run())
+AMBIENCE = {  # bg -> list of (generator, gain dB)
+    "day": [("wind", -36)],
+    "forest": [("wind", -34)],
+    "night": [("crickets", -30), ("wind", -42)],
+    "interior": [("room", -44)],
+    "shop": [("room", -44)],
+    "modern": [("room", -46)],
+}
 
 
-def decode(path):
-    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", path, "-f", "s16le", "-ac", "1",
-                          "-ar", str(SR), "-"], check=True, capture_output=True).stdout
-    return np.frombuffer(raw, np.int16).astype(np.float32) / 32768
-
-
-def _trim(a, thr=0.012):
-    idx = np.where(np.abs(a) > thr)[0]
-    if len(idx) == 0:
-        return a
-    return a[max(0, idx[0] - int(0.02 * SR)): idx[-1] + int(0.05 * SR)]
-
-
-def tts_piper(segments, work, model, length_scale):
-    """Offline neural TTS. Synthesises per segment; word times are spread across
-    each segment by word length (good enough for one-word captions)."""
-    from piper import PiperVoice
-
-    pv = PiperVoice.load(model)
-    gap = np.zeros(int(0.07 * SR), np.float32)
-    parts, words, t = [], [], 0.0
-    for i, seg in enumerate(segments):
-        p = os.path.join(work, f"seg{i:02d}.wav")
-        with wave.open(p, "wb") as wf:
-            try:
-                from piper import SynthesisConfig
-                pv.synthesize_wav(seg["text"], wf,
-                                  syn_config=SynthesisConfig(length_scale=length_scale))
-            except ImportError:
-                pv.synthesize(seg["text"], wf, length_scale=length_scale)
-        a = _trim(decode(p))
-        dur = len(a) / SR
-        toks = [w for w in seg["text"].split() if norm(w)]
-        wts = [len(norm(w)) + 2 + (3 if w[-1] in ",.?!" else 0) for w in toks]
-        tot = float(sum(wts))
-        acc = 0.0
-        for w, k in zip(toks, wts):
-            st = t + dur * acc / tot
-            acc += k
-            words.append((st, t + dur * acc / tot, w))
-        parts += [a, gap]
-        t += dur + len(gap) / SR
-    return np.concatenate(parts).astype(np.float32), words
-
-
-# ---------------------------------------------------------------- music + sfx
-def pluck(freq, dur, amp=1.0):
-    t = np.arange(int(dur * SR)) / SR
-    env = np.exp(-t * 7.0)
-    sig = sum(np.sin(2 * np.pi * freq * h * t) / h ** 1.3 for h in range(1, 6))
-    return sig * env * amp
-
-
-def music(duration, bpm=128):
-    out = np.zeros(int((duration + 2) * SR), np.float32)
-    beat = 60 / bpm
-    eighth = beat / 2
-    # G  C  D  G  (banjo-ish arpeggios over a walking bass)
-    chords = [(196.0, 246.9, 293.7, 392.0), (261.6, 329.6, 392.0, 523.3),
-              (293.7, 370.0, 440.0, 587.3), (196.0, 246.9, 293.7, 392.0)]
-    bass = [98.0, 130.8, 146.8, 98.0]
-    pattern = [0, 2, 1, 3, 2, 1, 3, 2]
-    t = 0.0
-    bar = 0
-    while t < duration + 1:
-        ch = chords[bar % 4]
-        for i in range(8):
-            st = int((t + i * eighth) * SR)
-            n = pluck(ch[pattern[i]], 0.6, 0.35 if i % 2 else 0.5)
-            out[st:st + len(n)] += n[: max(0, len(out) - st)]
-            if i % 4 == 0:
-                b = pluck(bass[bar % 4] if i == 0 else bass[bar % 4] * 1.5, 0.9, 0.8)
-                out[st:st + len(b)] += b[: max(0, len(out) - st)]
-        t += 8 * eighth
-        bar += 1
-    out /= np.max(np.abs(out)) + 1e-9
-    return out
-
-
-def whoosh(dur=0.22):
-    n = int(dur * SR)
-    rng = np.random.default_rng(3)
-    x = rng.normal(0, 1, n).astype(np.float32)
-    x = np.convolve(x, np.ones(30) / 30, mode="same")
-    env = np.sin(np.linspace(0, np.pi, n)) ** 2
-    return x * env / (np.max(np.abs(x)) + 1e-9)
-
-
-def write_wav(path, x):
-    x = np.clip(x, -1, 1)
-    with wave.open(path, "wb") as w:
-        w.setnchannels(1)
-        w.setsampwidth(2)
-        w.setframerate(SR)
-        w.writeframes((x * 32767).astype(np.int16).tobytes())
-
-
-# ---------------------------------------------------------------- timing
-def norm(w):
-    return re.sub(r"[^a-z0-9$¢]", "", w.lower())
-
-
+# ---------------------------------------------------------------- prep
 def segment_starts(segments, words):
-    counts = [len([w for w in seg["text"].split() if norm(w)]) for seg in segments]
+    counts = [len([w for w in seg["text"].split() if A.norm(w)]) for seg in segments]
     total = sum(counts)
     if total != len(words):
         print(f"[warn] script has {total} words, TTS returned {len(words)}; scaling")
@@ -165,27 +48,119 @@ def segment_starts(segments, words):
     return starts
 
 
-# ---------------------------------------------------------------- video
-def render_shot(job):
-    (short_name, idx, f0, f1, t_start, t_end, W, H, fps, words, out) = job
-    short = importlib.import_module(f"shorts.{short_name}")
-    seg = short.SEGMENTS[idx]
+def prep(args):
+    short = importlib.import_module(f"shorts.{args.short}")
+    work = args.work
+    os.makedirs(work, exist_ok=True)
+    text = " ".join(s["text"] for s in short.SEGMENTS)
+
+    voice = None
+    pref = os.environ.get("TTS_ENGINE", "auto")
+    if pref in ("auto", "edge"):
+        try:
+            mp3 = os.path.join(work, "voice.mp3")
+            words = A.tts_edge(text, mp3, short.VOICE, short.RATE)
+            voice = A.decode(mp3)
+            print("tts: edge")
+        except Exception as e:  # noqa: BLE001
+            if pref == "edge":
+                raise
+            print(f"[warn] edge-tts failed ({type(e).__name__}: {e}); using Piper")
+    if pref == "fake":  # silent placeholder voice for local testing without network
+        words, t = [], 0.3
+        for w in text.split():
+            words.append((t, t + 0.22, w))
+            t += 0.27 + (0.12 if w[-1] in ",.?!" else 0)
+        voice = np.zeros(int((t + 0.3) * A.SR), np.float32)
+    if voice is None:
+        model = os.environ.get("PIPER_MODEL", os.path.join(A.HERE, "voices",
+                                                           "en_US-ryan-high.onnx"))
+        voice, words = A.tts_piper(short.SEGMENTS, work, model,
+                                   float(getattr(short, "PIPER_LENGTH_SCALE", 0.8)))
+        print("tts: piper")
+    vdur = len(voice) / A.SR
+    print(f"voice: {vdur:.1f}s, {len(words)} words, {len(words) / vdur * 60:.0f} WPM")
+
+    starts = segment_starts(short.SEGMENTS, words)
+    total = vdur + 0.7
+    ends = starts[1:] + [total]
+
+    # sound effects + ambience
+    m = A.Mixer(total)
+    m.whoosh = A.whoosh()
+    m.chime = A.chime()
+    m.vox = {}
+    for tag, (txt, v, rate, pitch) in getattr(short, "VOCALS", {}).items():
+        m.vox[tag] = A.vocal(txt, v, work, tag, rate, pitch)
+    gens = {"wind": A.wind, "crickets": A.crickets, "room": A.room}
+    for seg, a, b in zip(short.SEGMENTS, starts, ends):
+        d = b - a
+        for name, g in AMBIENCE.get(seg.get("bg", "day"), []):
+            x = gens[name](d + 0.1)
+            fade = min(len(x) // 2, int(0.05 * A.SR))
+            x[:fade] *= np.linspace(0, 1, fade)
+            x[-fade:] *= np.linspace(1, 0, fade)
+            m.add(x, a, g)
+        if seg.get("audio"):
+            seg["audio"](m, a, d)
+    for st in starts[1:]:
+        m.add(m.whoosh, st - 0.08, -32)
+    sfx = m.buf[: int(total * A.SR)]
+
+    bed = A.music(total)[: len(sfx)] * 10 ** (-21 / 20)
+    vpad = np.zeros(len(sfx), np.float32)
+    vpad[: min(len(voice), len(vpad))] = voice[: len(vpad)]
+    bed = A.duck(bed, vpad, -8)
+    mix = vpad + sfx + bed
+    mix /= max(1.0, float(np.max(np.abs(mix))) / 0.89)
+    A.write_wav(os.path.join(work, "mix.wav"), mix)
+
+    fps = args.fps
+    shots = []
+    for i, (a, b) in enumerate(zip(starts, ends)):
+        f0, f1 = round(a * fps), round(b * fps)
+        shots.append(dict(idx=i, f0=f0, f1=f1))
+    # balance shots across shards by frame count (greedy)
+    loads = [0] * args.shards
+    for sh in sorted(shots, key=lambda s: s["f1"] - s["f0"], reverse=True):
+        k = loads.index(min(loads))
+        sh["shard"] = k
+        loads[k] += sh["f1"] - sh["f0"]
+    plan = dict(short=args.short, fps=fps, width=args.width, height=args.height,
+                shards=args.shards, shots=shots, words=words, total=total)
+    json.dump(plan, open(os.path.join(work, "plan.json"), "w"))
+    print(f"plan: {len(shots)} shots, {round(total * fps)} frames @ {fps} fps, "
+          f"shard loads {loads}")
+
+
+# ---------------------------------------------------------------- shots
+def _render_shot(job):
+    import cairo
+
+    import engine as E
+    plan, sh, out = job
+    short = importlib.import_module(f"shorts.{plan['short']}")
+    seg = short.SEGMENTS[sh["idx"]]
+    W, H, fps = plan["width"], plan["height"], plan["fps"]
     S = W / E.BASE_W
+    t_start, t_end = sh["f0"] / fps, sh["f1"] / fps
     dur = t_end - t_start
+    words = plan["words"]
     gold_words = set(getattr(short, "GOLD_WORDS", []))
     ff = subprocess.Popen(
-        ["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24",
+        ["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "bgra",
          "-s", f"{W}x{H}", "-r", str(fps), "-i", "-", "-c:v", "libx264",
-         "-preset", os.environ.get("X264_PRESET", "fast"), "-crf", "18",
+         "-preset", os.environ.get("X264_PRESET", "fast"), "-crf", "17",
          "-pix_fmt", "yuv420p", out], stdin=subprocess.PIPE)
     wi = 0
-    for f in range(f0, f1):
+    for f in range(sh["f0"], sh["f1"]):
         tg = f / fps
         tl = tg - t_start
-        img = E.sky(seg.get("bg", "day"), W, H).copy()
-        c = E.Canvas(img, S)
+        surf = cairo.ImageSurface(cairo.FORMAT_ARGB32, W, H)
+        c = E.Canvas(surf, S, W, H, tl)
+        E.sky(c, seg.get("bg", "day"))
         seg["draw"](c, tl, dur)
-        img = E.finish(img)
+        E.finish(c)
         while wi + 1 < len(words) and words[wi + 1][0] <= tg:
             wi += 1
         if words and words[wi][0] <= tg:
@@ -193,94 +168,71 @@ def render_shot(job):
             if tg < max(nxt, words[wi][1] + 0.15) or tg < words[wi][0] + 0.6:
                 raw = words[wi][2]
                 txt = re.sub(r"^[\"'(]+|[\"'),.!?;:]+$", "", raw)
-                gold = (norm(raw) in gold_words or any(ch.isdigit() for ch in raw)
+                gold = (A.norm(raw) in gold_words or any(ch.isdigit() for ch in raw)
                         or "$" in raw)
-                E.draw_caption(img, S, txt, tg - words[wi][0], gold)
-        ff.stdin.write(img.tobytes())
+                E.draw_caption(c, txt, tg - words[wi][0], gold)
+        surf.flush()
+        ff.stdin.write(surf.get_data())
     ff.stdin.close()
     ff.wait()
+    if ff.returncode:
+        raise RuntimeError(f"ffmpeg failed on {out}")
     return out
 
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--short", default="s001")
-    ap.add_argument("--width", type=int, default=2160)
-    ap.add_argument("--height", type=int, default=3840)
-    ap.add_argument("--fps", type=int, default=30)
-    ap.add_argument("--out", default="out/short.mp4")
-    ap.add_argument("--work", default="out/work")
-    ap.add_argument("--jobs", type=int, default=os.cpu_count() or 2)
-    args = ap.parse_args()
-
-    os.makedirs(args.work, exist_ok=True)
-    os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
-    short = importlib.import_module(f"shorts.{args.short}")
-    text = " ".join(s["text"] for s in short.SEGMENTS)
-
-    # 1. voice + word timings (Microsoft Edge voice, falling back to local Piper)
-    engine_pref = os.environ.get("TTS_ENGINE", "auto")
-    voice = None
-    if engine_pref in ("auto", "edge"):
-        try:
-            mp3 = os.path.join(args.work, "voice.mp3")
-            words = tts(text, mp3, short.VOICE, short.RATE)
-            voice = decode(mp3)
-            print("tts: edge")
-        except Exception as e:  # noqa: BLE001
-            if engine_pref == "edge":
-                raise
-            print(f"[warn] edge-tts failed ({type(e).__name__}: {e}); using Piper")
-    if voice is None:
-        voice, words = tts_piper(short.SEGMENTS, args.work,
-                                 os.environ.get("PIPER_MODEL",
-                                                os.path.join(E.HERE, "voices", "en_US-ryan-high.onnx")),
-                                 float(getattr(short, "PIPER_LENGTH_SCALE", 0.8)))
-        print("tts: piper")
-    vdur = len(voice) / SR
-    print(f"voice: {vdur:.1f}s, {len(words)} words, {len(words) / vdur * 60:.0f} WPM")
-    json.dump(words, open(os.path.join(args.work, "words.json"), "w"), indent=0)
-
-    starts = segment_starts(short.SEGMENTS, words)
-    total = vdur + 0.7
-    ends = starts[1:] + [total]
-
-    # 2. audio mix: voice + music bed (-24 dB) + whooshes on cuts
-    bed = music(total)[: int(total * SR)]
-    mixd = np.zeros(int(total * SR), np.float32)
-    mixd[: len(voice)] += voice
-    mixd[: len(bed)] += bed * 10 ** (-24 / 20) * 2.2
-    wh = whoosh()
-    for st in starts[1:]:
-        i = int(st * SR)
-        seg = wh[: max(0, len(mixd) - i)]
-        mixd[i:i + len(seg)] += seg * 10 ** (-30 / 20)
-    mixd /= max(1.0, np.max(np.abs(mixd)) / 0.89)
-    wav = os.path.join(args.work, "mix.wav")
-    write_wav(wav, mixd)
-
-    # 3. video, one shot per worker
-    jobs = []
-    for i, (a, b) in enumerate(zip(starts, ends)):
-        f0, f1 = round(a * args.fps), round(b * args.fps)
-        jobs.append((args.short, i, f0, f1, f0 / args.fps, f1 / args.fps, args.width,
-                     args.height, args.fps, words, os.path.join(args.work, f"shot{i:02d}.mp4")))
+def shots(args):
+    plan = json.load(open(os.path.join(args.work, "plan.json")))
+    if args.width:
+        plan["width"], plan["height"] = args.width, args.height
+    mine = [s for s in plan["shots"] if args.shard is None or s["shard"] == args.shard]
+    jobs = [(plan, s, os.path.join(args.work, f"shot{s['idx']:02d}.mp4")) for s in mine]
+    jobs.sort(key=lambda j: j[1]["f1"] - j[1]["f0"], reverse=True)
     with mp.get_context("spawn").Pool(args.jobs) as pool:
-        for done in pool.imap_unordered(render_shot, jobs):
+        for done in pool.imap_unordered(_render_shot, jobs):
             print("rendered", os.path.basename(done), flush=True)
 
+
+# ---------------------------------------------------------------- assemble
+def assemble(args):
+    plan = json.load(open(os.path.join(args.work, "plan.json")))
     lst = os.path.join(args.work, "shots.txt")
     with open(lst, "w") as f:
-        for j in jobs:
-            f.write(f"file '{os.path.abspath(j[-1])}'\n")
+        for s in plan["shots"]:
+            seg_path = os.path.abspath(os.path.join(args.work, "shot%02d.mp4" % s["idx"]))
+            f.write("file '%s'\n" % seg_path)
     silent = os.path.join(args.work, "video.mp4")
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "concat", "-safe", "0", "-i", lst,
                     "-c", "copy", silent], check=True)
-    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", silent, "-i", wav, "-c:v", "copy",
+    os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", silent,
+                    "-i", os.path.join(args.work, "mix.wav"), "-c:v", "copy",
                     "-af", "loudnorm=I=-14:TP=-1.5:LRA=11", "-c:a", "aac", "-b:a", "192k",
                     "-ar", "48000", "-movflags", "+faststart", "-shortest", args.out],
                    check=True)
     print("done:", args.out)
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("stage", choices=["prep", "shots", "assemble", "all"])
+    ap.add_argument("--short", default="s001")
+    ap.add_argument("--width", type=int, default=2160)
+    ap.add_argument("--height", type=int, default=3840)
+    ap.add_argument("--fps", type=int, default=60)
+    ap.add_argument("--shards", type=int, default=1)
+    ap.add_argument("--shard", type=int, default=None)
+    ap.add_argument("--work", default="out/work")
+    ap.add_argument("--out", default="out/short.mp4")
+    ap.add_argument("--jobs", type=int, default=os.cpu_count() or 2)
+    args = ap.parse_args()
+    if args.stage in ("prep", "all"):
+        prep(args)
+    if args.stage in ("shots", "all"):
+        if args.stage == "shots" and "--width" not in sys.argv:
+            args.width = args.height = None
+        shots(args)
+    if args.stage in ("assemble", "all"):
+        assemble(args)
 
 
 if __name__ == "__main__":
