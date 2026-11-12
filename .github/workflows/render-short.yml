@@ -1,0 +1,55 @@
+name: Render Short (4K)
+
+on:
+  workflow_dispatch:
+    inputs:
+      short:
+        description: "Short module to render (render/shorts/<name>.py)"
+        default: "s001"
+      width:
+        description: "Width"
+        default: "2160"
+      height:
+        description: "Height"
+        default: "3840"
+  push:
+    paths:
+      - "render/**"
+      - ".github/workflows/render-short.yml"
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install ffmpeg
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+
+      - name: Install Python deps and fonts
+        run: |
+          pip install -r render/requirements.txt
+          bash render/fetch_fonts.sh
+
+      - name: Render
+        env:
+          X264_PRESET: medium
+        run: |
+          python render/render.py \
+            --short "${{ inputs.short || 's001' }}" \
+            --width "${{ inputs.width || '2160' }}" \
+            --height "${{ inputs.height || '3840' }}" \
+            --out "out/${{ inputs.short || 's001' }}_4k.mp4"
+          ffprobe -v error -show_entries stream=codec_name,width,height,r_frame_rate:format=duration,size \
+            -of default=nw=1 out/*_4k.mp4
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.short || 's001' }}-4k
+          path: out/*_4k.mp4
+          retention-days: 30
