@@ -6,7 +6,8 @@ name: Render Short (3D)
 #   * Start the commit message with "[final]" for the FULL render (1080x1920, 30 fps).
 #   * Or run it by hand: Actions -> Render Short (3D) -> Run workflow (once this file is on main).
 #
-# Download the video from the run page under "Artifacts" (kept 30 days).
+# Watch the result at: https://github.com/<owner>/<repo>/releases (one release per Short + quality,
+# replaced on every render). The run page also has it under "Artifacts" (kept 30 days).
 on:
   workflow_dispatch:
     inputs:
@@ -22,6 +23,9 @@ on:
     paths:
       - "render3d/**"
       - ".github/workflows/render-short.yml"
+
+permissions:
+  contents: write
 
 concurrency:
   group: render-${{ github.ref }}
@@ -141,3 +145,16 @@ jobs:
             out/frames.jpg
           compression-level: 0
           retention-days: 30
+      - name: Publish watchable link (GitHub Release)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${SHORT}-${QUALITY}"
+          gh release view "$TAG" >/dev/null 2>&1 || \
+            gh release create "$TAG" --title "Short ${SHORT} (${QUALITY})" --prerelease \
+              --target "$GITHUB_SHA" --notes "Latest ${QUALITY} render of ${SHORT}. Tap the .mp4 to watch."
+          gh release upload "$TAG" "out/$NAME.mp4" out/frames.jpg --clobber
+          gh release edit "$TAG" --notes "Latest ${QUALITY} render of ${SHORT} from commit ${GITHUB_SHA::7} ($(date -u +'%Y-%m-%d %H:%M UTC')). Tap ${NAME}.mp4 to watch."
+          URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/${NAME}.mp4"
+          echo "### ▶️ Watch: [${NAME}.mp4](${URL})" >> "$GITHUB_STEP_SUMMARY"
+          echo "Watch: $URL"

@@ -8,7 +8,9 @@ The target look is described in [`analysis/04_reference_style_3d.md`](../analysi
 
 1. **Prep** (1 job): narrator voice (Microsoft Edge neural voice, with an offline Piper voice as backup), word timings, sound effects and ambience, giving `mix.wav` and a shot plan.
 2. **Shots** (several parallel jobs): each job builds its shots in Blender, renders the 3D frames, upscales them, then draws the graphics layer (captions, pop-up words, labels, badges, meters, stamps and whip-pan blur) and encodes MP4 segments.
-3. **Assemble** (1 job): joins the shots, adds the audio, normalises loudness to −14 LUFS, and uploads `<short>-<quality>-video` (the MP4 plus a frame sheet).
+3. **Assemble** (1 job): joins the shots, adds the audio, normalises loudness to −14 LUFS, and publishes the MP4 to the repo's **Releases** page (one release per Short and quality, for example `s002-preview`, replaced on every render) so it plays straight in a browser.
+
+**Watch the latest render:** https://github.com/Obakoyowa001/YT-shorts/releases
 
 | Quality | 3D render | Output | FPS | Shards | Use |
 | :--- | :--- | :--- | :--- | :--- | :--- |
