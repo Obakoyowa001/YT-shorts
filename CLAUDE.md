@@ -14,6 +14,9 @@ This repository contains a complete reverse-engineering and video analysis of th
   3. **How Money Gets Cleaned** (`IdSsAquESBE` — 61s, 1.71M views, 53.6K likes)
 - [`analysis/03_performance_insights_and_strategy.md`](./analysis/03_performance_insights_and_strategy.md) — Verified metrics, which topics perform best, originality guardrails, topic backlog, and the production/automation pipeline.
 - [`transcripts/`](./transcripts/) — Clean full-text scripts, word-level timing stats, and raw `.vtt` caption files.
+- [`analysis/04_reference_style_3d.md`](./analysis/04_reference_style_3d.md) — **The target visual style**: real 3D toy-figure animation, camera and editing rhythm, motion-graphics layer, captions and the "mystery" story arc, taken from a reference Short the user supplied.
+- [`render3d/`](./render3d/) — **The 3D renderer** (Blender `bpy` + Cycles on GitHub Actions). Each Short is a Python file in `render3d/shorts/`. See [`render3d/README.md`](./render3d/README.md).
+- `render/` — The old 2D renderer, now retired. Its `audio.py` and `sfx/` are still used by the 3D renderer.
 
 ---
 
@@ -73,4 +76,14 @@ When the user asks you to create a new video, provide:
 2. **Full Voiceover Script** with word count, estimated duration, and `[emphasis/pause]` markers.
 3. **Shot-by-Shot Storyboard Table** (Timestamp | Shot Duration | Spoken Line | 3D Visual Scene & Camera Move | In-World Prop Text | SFXCue).
 4. **AI Video / 3D Scene Generation Prompts** (ready to paste into image/video generators or Blender/3D pipelines).
+
+---
+
+## 3. Producing the Video (3D)
+
+Every new Short is produced as **real 3D animation** in [`render3d/`](./render3d/), in the style of [`analysis/04_reference_style_3d.md`](./analysis/04_reference_style_3d.md). The old 2D/2.5D look is retired.
+- Write the Short as `render3d/shorts/sNNN.py`, one `SHOTS` entry per ~2–2.5 s of narration (about 22–28 shots per minute). Use the kit's cast, sets and props, and add new props to `kit.py` when they will be reused.
+- Every shot needs a moving camera (`cam.at` keys plus `cam.drift`), at least one character reaction or prop action keyed to a spoken word (`c.w("word")`), and usually one graphics beat (`pop`, `tag`, `icon`, `badge`, `meter`, `stamp`, `card`).
+- Use lighting to mark story mood: `light_day` for setup, `light_night` for tension or reveals, `light_amber` for interiors and detectives.
+- Push to get a cheap preview render. Put `[final]` in the commit message only when the preview is approved, because final renders use a lot of the private repo's GitHub Actions minutes.
 

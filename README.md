@@ -25,6 +25,8 @@ This repository contains the downloaded source assets, transcripts, metadata, an
 | [`analysis/03_performance_insights_and_strategy.md`](./analysis/03_performance_insights_and_strategy.md) | Independent metric verification, topic-performance insights (shady topics ~2x views), originality guardrails, topic backlog, and automation pipeline. |
 | [`transcripts/transcripts_clean.md`](./transcripts/transcripts_clean.md) | Clean, full-text transcripts with exact word counts and speaking-rate (WPS/WPM) metrics. |
 | [`videos/`](./videos/) | Downloaded `.mp4` video files, `.en.vtt` word-level timestamped subtitle files, and `.info.json` metadata. |
+| [`analysis/04_reference_style_3d.md`](./analysis/04_reference_style_3d.md) | The target 3D visual style: toy figures, camera and editing, graphics layer and story arc. |
+| [`render3d/`](./render3d/) | The 3D renderer (Blender on GitHub Actions). Push to get a preview; put `[final]` in the commit message for the full render. See [`render3d/README.md`](./render3d/README.md). |
 
 ---
 
