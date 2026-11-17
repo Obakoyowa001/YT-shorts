@@ -13,7 +13,7 @@ The target look is described in [`analysis/04_reference_style_3d.md`](../analysi
 | Quality | 3D render | Output | FPS | Shards | Use |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | `preview` | 360×640, 2 samples | 540×960 | 15 | 4 | Check staging and timing. Cheap. |
-| `final` | 720×1280, 4 samples + denoise | 1080×1920 | 30 | 16 | The video you upload. |
+| `final` | 720×1280, 2 samples + denoise | 1080×1920 | 30 | 16 | The video you upload. |
 
 ## Triggering
 
@@ -21,7 +21,7 @@ The target look is described in [`analysis/04_reference_style_3d.md`](../analysi
 - **Final render:** start the commit message with `[final]`.
 - **Manual:** Actions → *Render Short (3D)* → *Run workflow*, then choose the Short and quality. This only works once the workflow is on `main`.
 
-> **GitHub minutes:** this repo is private, so GitHub gives it 2-core machines and a monthly allowance of free minutes (2,000 on the free plan). A final render of a one-minute Short uses roughly 4–6 hours of machine time spread across 16 parallel jobs. A preview uses about 30–40 minutes. Check usage under GitHub → Settings → Billing.
+> **GitHub minutes:** this repo is private, so GitHub gives it 2-core machines and a monthly allowance of free minutes (2,000 on the free plan). Measured on GitHub, a preview of a one-minute Short uses about 1–1.5 hours of machine time. A final render is estimated at about 4–8 hours (GitHub's machines vary up to 3× in speed), so only a few finals fit in the free allowance each month. Check usage under GitHub → Settings → Billing.
 
 ## Files
 

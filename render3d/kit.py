@@ -388,6 +388,22 @@ def cone(r, depth, loc=(0, 0, 0), material=None, parent=None, rot=(0, 0, 0), nam
     return cyl(r, depth, loc, material, parent, rot, r2=0.0, name=name)
 
 
+def prism(width, height, depth, loc=(0, 0, 0), material=None, parent=None, rot=(0, 0, 0),
+          name="prism"):
+    """Triangular prism (roof gable / pediment): base along X, apex up, extruded along Y."""
+    bm = bmesh.new()
+    pts = [(-width / 2, 0), (width / 2, 0), (0, height)]
+    front = [bm.verts.new((x, -depth / 2, z)) for x, z in pts]
+    back = [bm.verts.new((x, depth / 2, z)) for x, z in pts]
+    bm.faces.new(front)
+    bm.faces.new(list(reversed(back)))
+    for i in range(3):
+        j = (i + 1) % 3
+        bm.faces.new((front[i], back[i], back[j], front[j]))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    return _mesh(name, bm, material, parent, loc, rot)
+
+
 def plane(size, loc=(0, 0, 0), material=None, parent=None, rot=(0, 0, 0), name="plane"):
     bm = bmesh.new()
     bmesh.ops.create_grid(bm, x_segments=1, y_segments=1, size=0.5)
@@ -423,12 +439,20 @@ def text(s, loc=(0, 0, 0), size=0.3, material=None, rot=(90, 0, 0), fnt="Luckies
 
 
 # ---------------------------------------------------------------- keyframes
+def _fcurves(idb):
+    ad = idb.animation_data
+    if not ad or not ad.action:
+        return []
+    act = ad.action
+    if hasattr(act, "fcurves") and len(getattr(act, "layers", [])) == 0:
+        return act.fcurves
+    from bpy_extras import anim_utils
+    cb = anim_utils.action_get_channelbag_for_slot(act, ad.action_slot)
+    return cb.fcurves if cb else []
+
+
 def key(obj, path, t, value, interp=None, index=-1):
     """Keyframe obj.<path> = value at time t (seconds). interp: None=smooth, 'CONSTANT', 'LINEAR'."""
-    prefs = bpy.context.preferences.edit
-    old = prefs.keyframe_new_interpolation_type
-    if interp:
-        prefs.keyframe_new_interpolation_type = interp
     target = obj
     parts = path.split(".")
     for p in parts[:-1]:
@@ -442,8 +466,14 @@ def key(obj, path, t, value, interp=None, index=-1):
             cur[index] = value
             value = cur
         setattr(target, attr, value)
-    target.keyframe_insert(attr, frame=f(t), index=index)
-    prefs.keyframe_new_interpolation_type = old
+    fr = f(t)
+    target.keyframe_insert(attr, frame=fr, index=index)
+    if interp and isinstance(target, bpy.types.ID):
+        for fc in _fcurves(target):
+            if fc.data_path == attr:
+                for kp in fc.keyframe_points:
+                    if abs(kp.co.x - fr) < 0.5:
+                        kp.interpolation = interp
 
 
 def ease_keys(obj, path, keys, interp=None):

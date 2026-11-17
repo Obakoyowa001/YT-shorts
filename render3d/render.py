@@ -6,7 +6,7 @@
   all       everything locally
 
 Quality presets (--quality):
-  final    3D at 720x1280, 4 samples + denoise, 30 fps -> upscaled to 1080x1920 output
+  final    3D at 720x1280, 2 samples + denoise, 30 fps -> upscaled to 1080x1920 output
   preview  3D at 360x640, 2 samples, 15 fps            -> 540x960 output (fast check)
 
   python render3d/render.py all --short s002 --quality preview --out out/s002_preview.mp4
@@ -30,7 +30,7 @@ import numpy as np  # noqa: E402
 import audio as A  # noqa: E402
 
 QUALITY = {
-    "final": dict(rw=720, rh=1280, width=1080, height=1920, fps=30, spp=4),
+    "final": dict(rw=720, rh=1280, width=1080, height=1920, fps=30, spp=2),
     "preview": dict(rw=360, rh=640, width=540, height=960, fps=15, spp=2),
 }
 AMBIENCE = {
