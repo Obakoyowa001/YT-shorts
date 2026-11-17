@@ -3,7 +3,7 @@ name: Render Short (3D)
 # 3D Shorts rendered with Blender (Cycles, CPU) on GitHub's servers.
 #
 #   * Any push that changes render3d/** renders a quick PREVIEW (540x960, 15 fps).
-#   * Put "[final]" in the commit message for the FULL render (1080x1920, 30 fps).
+#   * Start the commit message with "[final]" for the FULL render (1080x1920, 30 fps).
 #   * Or run it by hand: Actions -> Render Short (3D) -> Run workflow (once this file is on main).
 #
 # Download the video from the run page under "Artifacts" (kept 30 days).
@@ -29,7 +29,7 @@ concurrency:
 
 env:
   SHORT: ${{ inputs.short || 's002' }}
-  QUALITY: ${{ inputs.quality || (contains(github.event.head_commit.message, '[final]') && 'final' || 'preview') }}
+  QUALITY: ${{ inputs.quality || (startsWith(github.event.head_commit.message, '[final]') && 'final' || 'preview') }}
   PY: "3.13"
 
 jobs:
@@ -54,6 +54,7 @@ jobs:
       - name: Prep
         id: plan
         run: |
+          python render3d/render.py check --short "$SHORT"
           if [ "$QUALITY" = "final" ]; then N=16; else N=4; fi
           python render3d/render.py prep --short "$SHORT" --quality "$QUALITY" --shards $N --work out/work
           echo "shards=$(python -c "import json;print(json.dumps(list(range($N))))")" >> "$GITHUB_OUTPUT"

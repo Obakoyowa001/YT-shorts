@@ -329,6 +329,33 @@ def shots(args):
             raise SystemExit(f"shot {idx} failed")
 
 
+def check(args):
+    """Build every shot's scene without rendering, to catch script errors in seconds."""
+    import traceback
+
+    import kit as K
+    import overlay as O
+    short = load_short(args.short)
+    bad = 0
+    for i, seg in enumerate(short.SHOTS):
+        words = [(0.2 + 0.3 * k, 0.4 + 0.3 * k, w) for k, w in enumerate(seg["text"].split())]
+        dur = 0.4 + 0.3 * len(words)
+        K.new_scene(64, 112, 15, 1)
+        try:
+            seg["build"](Ctx(words, dur, O.Overlay(64, 112, 15)))
+            m = A.Mixer(dur + 1)
+            m.whoosh = m.chime = np.zeros(10, np.float32)
+            m.vox = {k: np.zeros(10, np.float32) for k in getattr(short, "VOCALS", {})}
+            if seg.get("audio"):
+                seg["audio"](m, 0.0, dur, Cue(words, dur))
+            print(f"ok   shot {i:02d}")
+        except Exception:  # noqa: BLE001
+            bad += 1
+            print(f"FAIL shot {i:02d}\n{traceback.format_exc()}")
+    if bad:
+        raise SystemExit(f"{bad} shot(s) failed")
+
+
 # ---------------------------------------------------------------- assemble
 def assemble(args):
     plan = json.load(open(os.path.join(args.work, "plan.json")))
@@ -351,7 +378,7 @@ def assemble(args):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("stage", choices=["prep", "shots", "shot", "assemble", "all"])
+    ap.add_argument("stage", choices=["prep", "shots", "shot", "assemble", "all", "check"])
     ap.add_argument("--short", default="s002")
     ap.add_argument("--quality", choices=list(QUALITY), default="final")
     ap.add_argument("--shards", type=int, default=1)
@@ -365,6 +392,9 @@ def main():
     if args.stage == "shot":
         plan = json.load(open(os.path.join(args.work, "plan.json")))
         render_shot(plan, args.idx, args.work)
+        return
+    if args.stage == "check":
+        check(args)
         return
     if args.stage in ("prep", "all"):
         prep(args)

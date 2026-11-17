@@ -1073,7 +1073,7 @@ def banknote(loc, rot=(0, 0, 0), s=1.0, parent=None):
     root = empty("note", loc, rot, parent)
     box((0.62 * s, 0.3 * s, 0.012 * s), (0, 0, 0), mat(MONEY, 0.7), 0.004, root)
     box((0.5 * s, 0.2 * s, 0.004 * s), (0, 0, 0.007 * s), mat(MONEY_D, 0.7), 0.0, root)
-    text("$", (0, 0, 0.011 * s), 0.14 * s, mat(MONEY, 0.6), root, (0, 0, 0), extrude=0.0,
+    text("$", (0, 0, 0.011 * s), 0.14 * s, mat(MONEY, 0.6), parent=root, rot=(0, 0, 0), extrude=0.0,
          fnt="Montserrat-Black")
     return root
 

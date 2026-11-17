@@ -85,5 +85,5 @@ Every new Short is produced as **real 3D animation** in [`render3d/`](./render3d
 - Write the Short as `render3d/shorts/sNNN.py`, one `SHOTS` entry per ~2–2.5 s of narration (about 22–28 shots per minute). Use the kit's cast, sets and props, and add new props to `kit.py` when they will be reused.
 - Every shot needs a moving camera (`cam.at` keys plus `cam.drift`), at least one character reaction or prop action keyed to a spoken word (`c.w("word")`), and usually one graphics beat (`pop`, `tag`, `icon`, `badge`, `meter`, `stamp`, `card`).
 - Use lighting to mark story mood: `light_day` for setup, `light_night` for tension or reveals, `light_amber` for interiors and detectives.
-- Push to get a cheap preview render. Put `[final]` in the commit message only when the preview is approved, because final renders use a lot of the private repo's GitHub Actions minutes.
+- Push to get a cheap preview render. Start the commit message with `[final]` only when the preview is approved, because final renders use a lot of the private repo's GitHub Actions minutes.
 
