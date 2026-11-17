@@ -21,7 +21,7 @@ The target look is described in [`analysis/04_reference_style_3d.md`](../analysi
 - **Final render:** start the commit message with `[final]`.
 - **Manual:** Actions → *Render Short (3D)* → *Run workflow*, then choose the Short and quality. This only works once the workflow is on `main`.
 
-> **GitHub minutes:** this repo is private, so GitHub gives it 2-core machines and a monthly allowance of free minutes (2,000 on the free plan). Measured on GitHub, a preview of a one-minute Short uses about 1–1.5 hours of machine time. A final render is estimated at about 4–8 hours (GitHub's machines vary up to 3× in speed), so only a few finals fit in the free allowance each month. Check usage under GitHub → Settings → Billing.
+> **GitHub minutes:** this repo is public, so GitHub Actions minutes on its standard machines are free and unlimited. A preview of a one-minute Short takes roughly 30 minutes of wall time; a final render takes longer (it is split across 16 parallel machines). If the repo ever goes private again, renders count against the private-repo minute allowance.
 
 ## Files
 

@@ -5,3 +5,6 @@ __pycache__/
 render/fonts/
 out/
 render/voices/
+# Never commit other channels' videos (this repo is public)
+videos/
+*.mp4

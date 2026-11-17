@@ -52,7 +52,7 @@ The goal is to reuse the **formula** (5-Act structure, pacing, diegetic text, ca
 - **Scripts:** always write new scripts and new gags. Never re-voice or lightly reword a Wobbly Business script.
 - **Characters:** keep the four **roles** from CLAUDE.md Rule 3 (the Boss, the naive fall guy, the shady middleman, the authority figure). Give them **our own names and visual designs** rather than reproducing Timmy, Tony or the Tax Man as drawn by Wobbly Business.
 - **Branding:** use our own channel name/logo as the in-world shop sign (as they do with `WOBBLY BUSINESS`). Keep parody brands like `ORBIT` instead of real trademarks.
-- **Footage:** never upload or re-cut their video files. The `.mp4` files in `videos/` are for reference only.
+- **Footage:** never upload or re-cut their video files, and never commit them to this repo (it is public). Watch the originals on YouTube.
 
 ---
 
